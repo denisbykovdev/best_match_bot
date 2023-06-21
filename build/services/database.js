@@ -23,13 +23,7 @@ exports.multerStorage = new multer_gridfs_storage_1.GridFsStorage({
 exports.upload = (0, multer_1.default)({ storage: exports.multerStorage });
 async function startDataBase() {
     try {
-        const mongooseConnect = await mongoose_1.default.connect(process.env.MONGOATLAS
-        // {
-        //     useNewUrlParser: true,
-        //     useUnifiedTopology: true,
-        //     useCreateIndex: true
-        // }
-        );
+        const mongooseConnect = await mongoose_1.default.connect(process.env.MONGOATLAS);
         exports.bucket = new mongoose_1.default.mongo.GridFSBucket(mongooseConnect.connection.db, {
             bucketName: 'images'
         });

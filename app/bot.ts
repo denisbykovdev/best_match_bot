@@ -373,7 +373,9 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 			return invoice;
 		};
 
-		const paymentFinal = await context.replyWithInvoice(getInvoice(context.from?.id as number));
+		const paymentFinal = await context.replyWithInvoice(
+			getInvoice(context.from?.id as number)
+		);
 
 		console.log(`--- paymentFinal:`, paymentFinal);
 
@@ -460,7 +462,14 @@ researcherWizardHandler.action(
 		);
 
 		const experts = await Expert.find({
-			profession: context.update.callback_query['data']
+			profession:
+				context.update.callback_query['data'] === 'Лікар' ||
+				context.update.callback_query['data'] === 'Врач'
+					? ['Лікар', 'Врач']
+					: context.update.callback_query['data'] === 'Нутриціолог' ||
+					  context.update.callback_query['data'] === 'Нутрициолог'
+					? ['Нутриціолог', 'Нутрициолог']
+					: context.update.callback_query['data']
 		});
 
 		if (experts) {
@@ -623,12 +632,11 @@ stage.command('start', async context => {
 	);
 });
 
-stage.on('pre_checkout_query', (context) => {
-		console.log(`--- pre_checkout_query:`, context);
+stage.on('pre_checkout_query', context => {
+	console.log(`--- pre_checkout_query:`, context);
 
-		return context.answerPreCheckoutQuery(true)
-	}
-) // ответ на предварительный запрос по оплате
+	return context.answerPreCheckoutQuery(true);
+}); // ответ на предварительный запрос по оплате
 stage.on('successful_payment', async (context, next) => {
 	// ответ в случае положительной оплаты
 	console.log(`--- successful_payment:`, context);
@@ -733,10 +741,7 @@ stage.on('successful_payment', async (context, next) => {
 		}
 
 		const NewExpertCandidate = await Expert.create({
-			...(NewExpert satisfies Omit<
-				IExpert,
-				'photo' | 'educationCertificatePhoto'
-			>)
+			...(NewExpert satisfies Omit<IExpert, 'photo' | 'educationCertificatePhoto'>)
 		});
 
 		if (NewExpertCandidate) {
