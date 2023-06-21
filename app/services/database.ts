@@ -27,11 +27,6 @@ export async function startDataBase(): Promise<void> {
 	try {
 		const mongooseConnect = await mongoose.connect(
 			process.env.MONGOATLAS as string
-			// {
-			//     useNewUrlParser: true,
-			//     useUnifiedTopology: true,
-			//     useCreateIndex: true
-			// }
 		);
 
 		bucket = new mongoose.mongo.GridFSBucket(mongooseConnect.connection.db, {
