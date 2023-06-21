@@ -140,8 +140,8 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 						context.session.language === 'ua' ? 'Лікар' : 'Врач'
 					)
 				],
-				[Markup.button.callback('Юрист', 'lawyer')],
-				[Markup.button.callback('Психолог', 'psycho')],
+				[Markup.button.callback('Юрист', 'Юрист')],
+				[Markup.button.callback('Психолог', 'Психолог')],
 				[
 					Markup.button.callback(
 						context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог',
@@ -434,8 +434,8 @@ researcherWizardHandler.action('subscribed', async context => {
 						context.session.language === 'ua' ? 'Лікар' : 'Врач'
 					)
 				],
-				[Markup.button.callback('Юрист', 'lawyer')],
-				[Markup.button.callback('Психолог', 'psycho')],
+				[Markup.button.callback('Юрист', 'Юрист')],
+				[Markup.button.callback('Психолог', 'Психолог')],
 				[
 					Markup.button.callback(
 						context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог',
