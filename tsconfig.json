@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+      // "module": "ESNext",
+      "module": "CommonJS",
+      "target": "ESNext",
+      "lib": [
+          "DOM",
+          "DOM.Iterable",
+          "ESNext",
+          "ESNext.String",
+          "ES2021.String"
+      ],
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      // "sourceMap": true,
+      "strict": true,
+      "noImplicitAny": false,
+      "strictFunctionTypes": true,
+      "allowJs": true,
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "experimentalDecorators": true, // required for Decorators
+      "emitDecoratorMetadata": true, // required for Decorators,
+      "pretty": true,
+      "declaration": false,
+      "jsx": "react",
+      // "rootDir": "/",
+      "outDir": "./build",
+      "typeRoots": [
+          "node_modules/@types",
+          "@types"
+      ]
+  },
+  "include": [
+      "**/*"
+  ],
+  "exclude": [
+      "node_modules",
+      ".prettierrc",
+      "build"
+  ]
+}
