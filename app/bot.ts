@@ -339,8 +339,6 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 		);
 
 		return context.wizard.next();
-
-		// return context.scene.leave();
 	},
 	async context => {
 		if (context.update['callback_query']?.data === 'back-4') {
@@ -842,6 +840,5 @@ async function startServer() {
 
 startServer();
 
-//** enable graceful stop */
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

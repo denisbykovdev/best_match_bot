@@ -170,7 +170,6 @@ const expertWizard = new telegraf_1.Scenes.WizardScene('expert-wizard', expertWi
         ]
     ]));
     return context.wizard.next();
-    // return context.scene.leave();
 }, async (context) => {
     if (context.update['callback_query']?.data === 'back-4') {
         return await context.wizard['steps'][context.wizard.cursor - 2](context);
@@ -502,6 +501,5 @@ async function startServer() {
     }
 }
 startServer();
-//** enable graceful stop */
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));
