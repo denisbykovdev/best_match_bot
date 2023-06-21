@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-      // "module": "ESNext",
+    //   "module": "ESNext",
       "module": "CommonJS",
       "target": "ESNext",
       "lib": [
@@ -11,7 +11,7 @@
           "ES2021.String"
       ],
       "esModuleInterop": true,
-      "moduleResolution": "node",
+      "moduleResolution": "Node",
       // "sourceMap": true,
       "strict": true,
       "noImplicitAny": false,
@@ -31,7 +31,7 @@
       "outDir": "./build",
       "typeRoots": [
           "node_modules/@types",
-          "@types"
+          "app/@types"
       ]
   },
   "include": [

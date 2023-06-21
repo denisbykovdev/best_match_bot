@@ -17,8 +17,8 @@ import { GridFSBucket } from 'mongodb';
 import Expert from './models/Expert';
 import { Types } from 'mongoose';
 import { IExpert } from './@types/IExpert';
-import { ChatFromGetChat } from 'telegraf/typings/core/types/typegram';
-import { Blob } from 'buffer';
+import { Blob, FormData } from 'formdata-node'
+
 
 interface ISession
 	extends SceneSession<Scenes.WizardSessionData>,
@@ -678,7 +678,12 @@ stage.on('successful_payment', async (context, next) => {
 		const blobPhoto = new Blob([response.data], { type: 'image/jpeg' });
 
 		const formData = new FormData();
-		formData.append('save-photo', blobPhoto, file.file_id);
+		formData.append(
+			'save-photo', 
+			blobPhoto, 
+			// Buffer.from(response.data),
+			file.file_id
+		);
 
 		try {
 			const { data }: AxiosResponse['data'] = await axios.post(

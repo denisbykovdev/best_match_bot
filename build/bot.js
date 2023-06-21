@@ -10,6 +10,7 @@ const database_1 = require("./services/database");
 const axios_1 = __importDefault(require("axios"));
 const Expert_1 = __importDefault(require("./models/Expert"));
 const mongoose_1 = require("mongoose");
+const formdata_node_1 = require("formdata-node");
 const startWizardHandler = new telegraf_1.Composer();
 const expertWizardHandler = new telegraf_1.Composer();
 const researcherWizardHandler = new telegraf_1.Composer();
@@ -19,8 +20,8 @@ startWizardHandler.action(['ua', 'ru'], async (context) => {
     await context.editMessageText(context.session.language === 'ua'
         ? "Наш бот з пошуку експертів є інноваційним рішенням, розробленим для допомоги користувачам у пошуку та зв'язку з професіоналами в різних галузях знань. Він використовує передові алгоритми штучного інтелекту для забезпечення ефективного та точного пошуку експертів. Процес використання робота дуже простий і інтуїтивно зрозумілий. Користувач може ввести ключові слова або тему, на яку він шукає експертів. Наш бот аналізує ці дані та здійснює пошук по своїй базі даних, що містить інформацію про безліч експертів різних професійних областей. Бот надає користувачеві список експертів, які найбільше відповідають його запиту. Кожен профіль експерта містить інформацію про його кваліфікацію, досвід роботи, освіту та галузі спеціалізації. Користувач може переглянути ці профілі та вибрати найбільш відповідного експерта для своїх потреб. Коли користувач знаходить цікавого для нього експерта, бот надає різні способи зв'язку з ним. Хто Ви?"
         : 'Наш бот по поиску экспертов представляет собой инновационное решение, разработанное для помощи пользователям в поиске и связи с профессионалами в различных областях знаний. Он использует передовые алгоритмы искусственного интеллекта для обеспечения эффективного и точного поиска экспертов. Процесс использования бота очень прост и интуитивно понятен. Пользователь может ввести ключевые слова или тему, по которой он ищет экспертов. Наш бот анализирует эти данные и осуществляет поиск по своей базе данных, содержащей информацию о множестве экспертов различных профессиональных областей. Бот предоставляет пользователю список экспертов, наиболее соответствующих его запросу. Каждый профиль эксперта содержит информацию о его квалификации, опыте работы, образовании и областях специализации. Пользователь может просмотреть эти профили и выбрать наиболее подходящего эксперта для своих нужд. Когда пользователь находит интересующего его эксперта, бот предоставляет различные способы связи с ним. Кто Вы?:', telegraf_1.Markup.inlineKeyboard([
-        telegraf_1.Markup.button.callback('Я - эксперт', 'expert'),
-        telegraf_1.Markup.button.callback('Ищу эксперта', 'researcher')
+        telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Я - експерт' : 'Я - эксперт', 'expert'),
+        telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Шукаю експерта' : 'Ищу эксперта', 'researcher')
     ]));
 });
 startWizardHandler.action('expert', async (context) => {
@@ -61,8 +62,8 @@ const expertWizard = new telegraf_1.Scenes.WizardScene('expert-wizard', expertWi
         [
             telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Лікар' : 'Врач', context.session.language === 'ua' ? 'Лікар' : 'Врач')
         ],
-        [telegraf_1.Markup.button.callback('Юрист', 'lawyer')],
-        [telegraf_1.Markup.button.callback('Психолог', 'psycho')],
+        [telegraf_1.Markup.button.callback('Юрист', 'Юрист')],
+        [telegraf_1.Markup.button.callback('Психолог', 'Психолог')],
         [
             telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог', context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог')
         ]
@@ -233,8 +234,8 @@ researcherWizardHandler.action('subscribed', async (context) => {
             [
                 telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Лікар' : 'Врач', context.session.language === 'ua' ? 'Лікар' : 'Врач')
             ],
-            [telegraf_1.Markup.button.callback('Юрист', 'lawyer')],
-            [telegraf_1.Markup.button.callback('Психолог', 'psycho')],
+            [telegraf_1.Markup.button.callback('Юрист', 'Юрист')],
+            [telegraf_1.Markup.button.callback('Психолог', 'Психолог')],
             [
                 telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог', context.session.language === 'ua' ? 'Нутриціолог' : 'Нутрициолог')
             ]
@@ -249,7 +250,13 @@ researcherWizardHandler.action('subscribed', async (context) => {
 researcherWizardHandler.action(['Лікар', 'Юрист', 'Психолог', 'Нутриціолог', 'Врач', 'Нутрициолог'], async (context) => {
     console.log(`--- Bot.session4/researcher:`, context.update.callback_query['data']);
     const experts = await Expert_1.default.find({
-        profession: context.update.callback_query['data']
+        profession: context.update.callback_query['data'] === 'Лікар' ||
+            context.update.callback_query['data'] === 'Врач'
+            ? ['Лікар', 'Врач']
+            : context.update.callback_query['data'] === 'Нутриціолог' ||
+                context.update.callback_query['data'] === 'Нутрициолог'
+                ? ['Нутриціолог', 'Нутрициолог']
+                : context.update.callback_query['data']
     });
     if (experts) {
         const expertsWithPhotoes = await Promise.all(experts.map(async (ex) => await new Promise(resolve => {
@@ -359,7 +366,7 @@ stage.command('start', async (context) => {
         telegraf_1.Markup.button.callback('Російська', 'ru')
     ]));
 });
-stage.on('pre_checkout_query', (context) => {
+stage.on('pre_checkout_query', context => {
     console.log(`--- pre_checkout_query:`, context);
     return context.answerPreCheckoutQuery(true);
 }); // ответ на предварительный запрос по оплате
@@ -386,9 +393,11 @@ stage.on('successful_payment', async (context, next) => {
         const response = await axios_1.default.get(fileLink.href, {
             responseType: 'arraybuffer'
         });
-        const blobPhoto = new Blob([response.data], { type: 'image/jpeg' });
-        const formData = new FormData();
-        formData.append('save-photo', blobPhoto, file.file_id);
+        const blobPhoto = new formdata_node_1.Blob([response.data], { type: 'image/jpeg' });
+        const formData = new formdata_node_1.FormData();
+        formData.append('save-photo', blobPhoto, 
+        // Buffer.from(response.data),
+        file.file_id);
         try {
             const { data } = await axios_1.default.post(`${process.env.URL}/save-photo`, formData, {
                 headers: {
@@ -410,8 +419,8 @@ stage.on('successful_payment', async (context, next) => {
             const response = await axios_1.default.get(fileLink.href, {
                 responseType: 'arraybuffer'
             });
-            const blobPhoto = new Blob([response.data], { type: 'image/jpeg' });
-            const formData = new FormData();
+            const blobPhoto = new formdata_node_1.Blob([response.data], { type: 'image/jpeg' });
+            const formData = new formdata_node_1.FormData();
             formData.append('save-photo', blobPhoto, file.file_id);
             try {
                 const { data } = await axios_1.default.post(`${process.env.URL}/save-photo`, formData, {

@@ -25,7 +25,9 @@
     "axios": "^1.4.0",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
-    "mongoose": "^7.2.2",
+    "fetch-blob": "^4.0.0",
+    "formdata-node": "^4.0.0",
+    "mongoose": "^6.8.2",
     "multer": "^1.4.4-lts.1",
     "multer-gridfs-storage": "^5.0.2",
     "telegraf": "^4.12.2"
