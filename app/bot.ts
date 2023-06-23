@@ -17,8 +17,8 @@ import { GridFSBucket } from 'mongodb';
 import Expert from './models/Expert';
 import { Types } from 'mongoose';
 import { IExpert } from './@types/IExpert';
-import { Blob, FormData } from 'formdata-node'
-
+import { Blob, FormData } from 'formdata-node';
+import { Extra } from 'telegraf/lib';
 
 interface ISession
 	extends SceneSession<Scenes.WizardSessionData>,
@@ -60,11 +60,11 @@ startWizardHandler.action(['ua', 'ru'], async context => {
 			: 'Наш бот по поиску экспертов представляет собой инновационное решение, разработанное для помощи пользователям в поиске и связи с профессионалами в различных областях знаний. Он использует передовые алгоритмы искусственного интеллекта для обеспечения эффективного и точного поиска экспертов. Процесс использования бота очень прост и интуитивно понятен. Пользователь может ввести ключевые слова или тему, по которой он ищет экспертов. Наш бот анализирует эти данные и осуществляет поиск по своей базе данных, содержащей информацию о множестве экспертов различных профессиональных областей. Бот предоставляет пользователю список экспертов, наиболее соответствующих его запросу. Каждый профиль эксперта содержит информацию о его квалификации, опыте работы, образовании и областях специализации. Пользователь может просмотреть эти профили и выбрать наиболее подходящего эксперта для своих нужд. Когда пользователь находит интересующего его эксперта, бот предоставляет различные способы связи с ним. Кто Вы?:',
 		Markup.inlineKeyboard([
 			Markup.button.callback(
-				context.session.language === 'ua' ? 'Я - експерт' : 'Я - эксперт', 
+				context.session.language === 'ua' ? 'Я - експерт' : 'Я - эксперт',
 				'expert'
 			),
 			Markup.button.callback(
-				context.session.language === 'ua' ? 'Шукаю експерта' : 'Ищу эксперта', 
+				context.session.language === 'ua' ? 'Шукаю експерта' : 'Ищу эксперта',
 				'researcher'
 			)
 		])
@@ -137,9 +137,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 		console.log(`--- Bot.session4:`, context.session);
 
 		await context.editMessageText(
-			context.session.language === 'ua'
-				? 'Ваша професія:'
-				: 'Ваша профессия:',
+			context.session.language === 'ua' ? 'Ваша професія:' : 'Ваша профессия:',
 			Markup.inlineKeyboard([
 				[
 					Markup.button.callback(
@@ -465,7 +463,8 @@ researcherWizardHandler.action(
 	async context => {
 		console.log(
 			`--- Bot.session4/researcher:`,
-			context.update.callback_query['data']
+			context.update.callback_query['data'],
+			context
 		);
 
 		const experts = await Expert.find({
@@ -498,6 +497,24 @@ researcherWizardHandler.action(
 							});
 							bucketStream.on('end', async () => {
 								const bufferBase64 = Buffer.concat(data);
+
+								// await context.editMessageMedia(
+								// 	{
+								// 		type: 'photo',
+								// 		media: {
+								// 			source: bufferBase64
+								// 		},
+								// 		caption: `ФІО : ${ex.full_name}\nПрофессія : ${ex.profession}\nДеталі профессії : ${ex.details}`,
+								// 		...Markup.inlineKeyboard([
+								// 			[
+								// 				Markup.button.url(
+								// 					ex.language === 'ua' ? 'Підписатись?' : 'Подписаться?',
+								// 					`tg://user?id=${ex.userId}`
+								// 				)
+								// 			]
+								// 		])
+								// 	},
+								// );
 
 								await context.replyWithPhoto(
 									{
@@ -591,7 +608,7 @@ researcherWizardHandler.action(
 			);
 		}
 
-		return context.wizard.next();
+		// return context.wizard.next();
 	}
 );
 
@@ -679,8 +696,8 @@ stage.on('successful_payment', async (context, next) => {
 
 		const formData = new FormData();
 		formData.append(
-			'save-photo', 
-			blobPhoto, 
+			'save-photo',
+			blobPhoto,
 			// Buffer.from(response.data),
 			file.file_id
 		);
@@ -818,6 +835,10 @@ server.use(
 	})
 );
 
+server.get('/', (req: Request, res: Response) =>
+	res.status(200).send({ checked: true })
+);
+
 server.post(
 	'/save-photo',
 	upload.single('save-photo'),
@@ -856,6 +877,16 @@ async function startServer() {
 }
 
 startServer();
+
+setInterval(() => {
+	const { data }: AxiosResponse['data'] = axios.get(`${process.env.URL!}/`, {
+		headers: {
+			'Content-Type': 'multipart/form-data'
+		}
+	});
+
+	console.log(`--- Bot/serve check/10min:`, data);
+}, 600);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

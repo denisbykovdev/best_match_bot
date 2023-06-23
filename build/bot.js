@@ -56,9 +56,7 @@ const startWizard = new telegraf_1.Scenes.WizardScene('start-wizard', startWizar
 const expertWizard = new telegraf_1.Scenes.WizardScene('expert-wizard', expertWizardHandler, async (context) => {
     context.session.__scenes.cursor = 1;
     console.log(`--- Bot.session4:`, context.session);
-    await context.editMessageText(context.session.language === 'ua'
-        ? 'Ваша професія:'
-        : 'Ваша профессия:', telegraf_1.Markup.inlineKeyboard([
+    await context.editMessageText(context.session.language === 'ua' ? 'Ваша професія:' : 'Ваша профессия:', telegraf_1.Markup.inlineKeyboard([
         [
             telegraf_1.Markup.button.callback(context.session.language === 'ua' ? 'Лікар' : 'Врач', context.session.language === 'ua' ? 'Лікар' : 'Врач')
         ],
@@ -248,7 +246,7 @@ researcherWizardHandler.action('subscribed', async (context) => {
     }
 });
 researcherWizardHandler.action(['Лікар', 'Юрист', 'Психолог', 'Нутриціолог', 'Врач', 'Нутрициолог'], async (context) => {
-    console.log(`--- Bot.session4/researcher:`, context.update.callback_query['data']);
+    console.log(`--- Bot.session4/researcher:`, context.update.callback_query['data'], context);
     const experts = await Expert_1.default.find({
         profession: context.update.callback_query['data'] === 'Лікар' ||
             context.update.callback_query['data'] === 'Врач'
@@ -270,6 +268,23 @@ researcherWizardHandler.action(['Лікар', 'Юрист', 'Психолог', 
             });
             bucketStream.on('end', async () => {
                 const bufferBase64 = Buffer.concat(data);
+                // await context.editMessageMedia(
+                // 	{
+                // 		type: 'photo',
+                // 		media: {
+                // 			source: bufferBase64
+                // 		},
+                // 		caption: `ФІО : ${ex.full_name}\nПрофессія : ${ex.profession}\nДеталі профессії : ${ex.details}`,
+                // 		...Markup.inlineKeyboard([
+                // 			[
+                // 				Markup.button.url(
+                // 					ex.language === 'ua' ? 'Підписатись?' : 'Подписаться?',
+                // 					`tg://user?id=${ex.userId}`
+                // 				)
+                // 			]
+                // 		])
+                // 	},
+                // );
                 await context.replyWithPhoto({
                     source: bufferBase64
                 }, {
@@ -338,7 +353,7 @@ researcherWizardHandler.action(['Лікар', 'Юрист', 'Психолог', 
             ? `За Вашим запитом не знайдено ні одного експерта.`
             : `По Вашему запросу не найдено ни одного эксперта.`);
     }
-    return context.wizard.next();
+    // return context.wizard.next();
 });
 const researcherWizard = new telegraf_1.Scenes.WizardScene('researcher-wizard', researcherWizardHandler);
 const Bot = new telegraf_1.Telegraf(process.env.TOKEN);
@@ -483,6 +498,7 @@ server.use(express_1.default.json());
 server.use(express_1.default.urlencoded({
     extended: false
 }));
+server.get('/', (req, res) => res.status(200).send({ checked: true }));
 server.post('/save-photo', database_1.upload.single('save-photo'), async (req, res) => {
     try {
         console.log(`--- Bot/server/save-photo/get:`, req.file);
@@ -510,5 +526,13 @@ async function startServer() {
     }
 }
 startServer();
+setInterval(() => {
+    const { data } = axios_1.default.get(`${process.env.URL}/`, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    console.log(`--- Bot/serve check/10min:`, data);
+}, 600);
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));
