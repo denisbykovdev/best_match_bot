@@ -13,12 +13,10 @@ import {
 	upload
 } from './services/database';
 import axios, { AxiosResponse } from 'axios';
-import { GridFSBucket } from 'mongodb';
 import Expert from './models/Expert';
 import { Types } from 'mongoose';
 import { IExpert } from './@types/IExpert';
 import { Blob, FormData } from 'formdata-node';
-import { Extra } from 'telegraf/lib';
 
 interface ISession
 	extends SceneSession<Scenes.WizardSessionData>,
@@ -132,7 +130,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 	'expert-wizard',
 	expertWizardHandler,
 	async context => {
-		context.session.__scenes.cursor = 1;
+		context.session.__scenes!.cursor = 1;
 
 		console.log(`--- Bot.session4:`, context.session);
 
@@ -159,7 +157,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 		return context.wizard.next();
 	},
 	async context => {
-		context.session.__scenes.cursor = 2;
+		context.session.__scenes!.cursor = 2;
 
 		context.session.profession = context.update['callback_query']?.data;
 
@@ -184,7 +182,10 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 			return await context.wizard['steps'][context.wizard.cursor - 2](context);
 		}
 
-		context.session.__scenes.cursor = 3;
+		context.session.__scenes!.cursor = 3;
+
+		//try
+		// context.scene.session.cursor = 3
 
 		context.session.details = context.message?.['text'];
 
@@ -209,7 +210,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 			return await context.wizard['steps'][context.wizard.cursor - 2](context);
 		}
 
-		context.session.__scenes.cursor = 4;
+		context.session.__scenes!.cursor = 4;
 
 		if (context.message?.['text'])
 			context.session.full_name = context.message?.['text'];
@@ -237,7 +238,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 			return context.wizard['steps'][context.wizard.cursor - 1](context);
 		}
 
-		context.session.__scenes.cursor = 5;
+		context.session.__scenes!.cursor = 5;
 
 		context.session.photo =
 			context.message?.['photo']?.[context.message?.['photo'].length - 1]?.file_id;
@@ -287,7 +288,7 @@ const expertWizard = new Scenes.WizardScene<IBotContext>(
 			context.session
 		);
 
-		context.session.__scenes.cursor = 6;
+		context.session.__scenes!.cursor = 6;
 
 		const photoLink = await context.telegram.getFileLink(
 			context.session.photo as string
@@ -483,7 +484,7 @@ researcherWizardHandler.action(
 				experts.map(
 					async ex =>
 						await new Promise(resolve => {
-							const bucketStream = (bucket as GridFSBucket).openDownloadStreamByName(
+							const bucketStream = bucket.openDownloadStreamByName(
 								ex.photoName
 							);
 
@@ -564,7 +565,7 @@ researcherWizardHandler.action(
 							});
 
 							if (ex.educationCertificatePhotoName) {
-								const bucketStream = (bucket as GridFSBucket).openDownloadStreamByName(
+								const bucketStream = bucket.openDownloadStreamByName(
 									ex.educationCertificatePhotoName
 								);
 
@@ -627,7 +628,7 @@ const stage = new Scenes.Stage<IBotContext>(
 );
 
 stage.command('start', async context => {
-	// console.log(`--- Stage.command.start:`, context);
+	console.log(`--- Stage.command.start:`, context);
 
 	context.scene.leave();
 	context.scene.enter('start-wizard');
@@ -651,7 +652,8 @@ stage.command('start', async context => {
 		'Оберіть мову:',
 		Markup.inlineKeyboard([
 			Markup.button.callback('Українська', 'ua'),
-			Markup.button.callback('Російська', 'ru')
+			Markup.button.callback('Російська', 'ru'),
+			Markup.button.webApp('web-app-link', 'https://fresh-coin.onrender.com')
 		])
 	);
 });
@@ -793,6 +795,8 @@ Bot.use(stage.middleware());
 // Bot.use(Telegraf.log());
 
 Bot.command('start', async context => {
+	console.log(`--- Bot.session.1:`, context);
+
 	await context.scene.enter('start-wizard');
 
 	context.session = {
@@ -814,7 +818,8 @@ Bot.command('start', async context => {
 		'Оберіть мову:',
 		Markup.inlineKeyboard([
 			Markup.button.callback('Українська', 'ua'),
-			Markup.button.callback('Російська', 'ru')
+			Markup.button.callback('Російська', 'ru'),
+			Markup.button.webApp('web-app-link', 'https://fresh-coin.onrender.com')
 		])
 	);
 });
@@ -833,10 +838,6 @@ server.use(
 	express.urlencoded({
 		extended: false
 	})
-);
-
-server.get('/', (req: Request, res: Response) =>
-	res.status(200).send({ checked: true })
 );
 
 server.post(
@@ -877,16 +878,6 @@ async function startServer() {
 }
 
 startServer();
-
-setInterval(() => {
-	const { data }: AxiosResponse['data'] = axios.get(`${process.env.URL!}/`, {
-		headers: {
-			'Content-Type': 'multipart/form-data'
-		}
-	});
-
-	console.log(`--- Bot/serve check/10min:`, data);
-}, 600);
 
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));

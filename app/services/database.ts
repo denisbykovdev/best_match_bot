@@ -2,7 +2,7 @@ import { GridFsStorage } from 'multer-gridfs-storage';
 import multer from 'multer';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { GridFSBucket } from 'mongodb';
+import { GridFSBucket } from 'mongoose/node_modules/mongodb';
 import { IFileInfo } from '../@types/IFileInfo';
 
 export let bucket: GridFSBucket;

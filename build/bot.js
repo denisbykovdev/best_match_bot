@@ -82,6 +82,8 @@ const expertWizard = new telegraf_1.Scenes.WizardScene('expert-wizard', expertWi
         return await context.wizard['steps'][context.wizard.cursor - 2](context);
     }
     context.session.__scenes.cursor = 3;
+    //try
+    // context.scene.session.cursor = 3
     context.session.details = context.message?.['text'];
     console.log(`--- Bot.session6:`, context.message?.['text'], context.session);
     await context.reply(context.session.language === 'ua'
@@ -361,7 +363,7 @@ const stage = new telegraf_1.Scenes.Stage([startWizard, expertWizard, researcher
     default: 'start-wizard'
 });
 stage.command('start', async (context) => {
-    // console.log(`--- Stage.command.start:`, context);
+    console.log(`--- Stage.command.start:`, context);
     context.scene.leave();
     context.scene.enter('start-wizard');
     context.session = {
@@ -378,7 +380,8 @@ stage.command('start', async (context) => {
     console.log(`--- Stage.command.start:`, context.session);
     await context.reply('Оберіть мову:', telegraf_1.Markup.inlineKeyboard([
         telegraf_1.Markup.button.callback('Українська', 'ua'),
-        telegraf_1.Markup.button.callback('Російська', 'ru')
+        telegraf_1.Markup.button.callback('Російська', 'ru'),
+        telegraf_1.Markup.button.webApp('web-app-link', 'https://fresh-coin.onrender.com')
     ]));
 });
 stage.on('pre_checkout_query', context => {
@@ -469,6 +472,7 @@ Bot.use((0, telegraf_1.session)());
 Bot.use(stage.middleware());
 // Bot.use(Telegraf.log());
 Bot.command('start', async (context) => {
+    console.log(`--- Bot.session.1:`, context);
     await context.scene.enter('start-wizard');
     context.session = {
         ...context.session,
@@ -484,7 +488,8 @@ Bot.command('start', async (context) => {
     console.log(`--- Bot.session.1:`, context.session);
     await context.reply('Оберіть мову:', telegraf_1.Markup.inlineKeyboard([
         telegraf_1.Markup.button.callback('Українська', 'ua'),
-        telegraf_1.Markup.button.callback('Російська', 'ru')
+        telegraf_1.Markup.button.callback('Російська', 'ru'),
+        telegraf_1.Markup.button.webApp('web-app-link', 'https://fresh-coin.onrender.com')
     ]));
 });
 try {
@@ -498,7 +503,6 @@ server.use(express_1.default.json());
 server.use(express_1.default.urlencoded({
     extended: false
 }));
-server.get('/', (req, res) => res.status(200).send({ checked: true }));
 server.post('/save-photo', database_1.upload.single('save-photo'), async (req, res) => {
     try {
         console.log(`--- Bot/server/save-photo/get:`, req.file);
@@ -526,13 +530,5 @@ async function startServer() {
     }
 }
 startServer();
-setInterval(() => {
-    const { data } = axios_1.default.get(`${process.env.URL}/`, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    });
-    console.log(`--- Bot/serve check/10min:`, data);
-}, 600);
 process.once('SIGINT', () => Bot.stop('SIGINT'));
 process.once('SIGTERM', () => Bot.stop('SIGTERM'));
