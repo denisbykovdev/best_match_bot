@@ -2,3 +2,4 @@
 .env
 /build
 .DS-Store
+node_modules/
